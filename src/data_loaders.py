@@ -1,25 +1,33 @@
 import json
 import numpy as np
 import pandas as pd
+import cPickle as p
+import os
+import matplotlib.pyplot as plt
+DATA_FILE = '../data/booksummaries.txt'
+PICKLE_DUMP = '../data/dataset.p'
 
+def read_data(filename,use_dump):
 
-def get_data_and_labels(filepath):
-    data = np.genfromtxt(filepath, delimiter='\t', dtype=str)
-    j = 0
+    if(not use_dump):
+        all_data = pd.read_csv(filename, sep = '\t',header=None)
+        all_data.columns = ['id','some_id','title','author','rel_date','genres','summary']
+        all_data = all_data[pd.notnull(all_data['genres'])]
+        genres = pd.Series(all_data['genres']).tolist()
+        for i in range(len(genres)):
+            genres[i] = json.loads(genres[i]).values()[0].encode('utf-8')
+        all_data['genres'] = pd.Series(genres)
+        p.dump(all_data,open(PICKLE_DUMP,'wb'))
+    else:
+        all_data = p.load(open(PICKLE_DUMP,'rb'))
+    return all_data
 
-    # Make the first genre as the label
-    for i in range(len(data)):
-        if len(data[i, 5]) == 0:
-            j += 1
-        else:
-            data[i, 5] = np.array(json.loads(data[i, 5]).values())[0].encode('utf-8')
+if __name__ == '__main__':
 
-    # Remove all missing values
-    df = pd.DataFrame(data)
-    df = df[df[5].str.len() > 0]
-    return df[6], df[5]
+    df = read_data(DATA_FILE,use_dump=False)
 
-
-file = "dataset_temp.txt"
-X, y = get_data_and_labels(filepath=file)
-print X, y
+    x = df['genres'].value_counts().plot()
+    plt.show()
+    
+    
+#    df.info(null_counts=True,verbose=True)
