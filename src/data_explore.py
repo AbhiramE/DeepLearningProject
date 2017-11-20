@@ -42,7 +42,7 @@ def read_data(filename, use_dump, dump=None):
 def format_data(data_frame, dump):
     adf = data_frame.drop(['id', 'some_id',
                            'title', 'author', 'rel_date'], axis=1)
-    adf = adf[pd.notnull(df['genres'])]
+    adf = adf[pd.notnull(data_frame['genres'])]
 
     # One hot encoding the genres.
     mlb = MultiLabelBinarizer()
