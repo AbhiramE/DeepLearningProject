@@ -1,5 +1,4 @@
 import cPickle as p
-import itertools
 import json
 from collections import Counter
 

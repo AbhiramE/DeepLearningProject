@@ -1,17 +1,10 @@
 import cPickle as p
-import itertools
-import json
-from collections import Counter
 
-import seaborn as sns
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import MultiLabelBinarizer
 
-import data_explore as de
+from src.explore import data_explore as de
 
 DATA_FILE = '../data/booksummaries.txt'
 PICKLE_DUMP = '../data/dataset.p'
@@ -25,8 +18,7 @@ def lda_transform(data_frame, n_topics, lda_dump, lda_model_file):
 
     tf_vectorizer = CountVectorizer(stop_words='english')
     vectors = tf_vectorizer.fit_transform(summaries)
-    lda_model = LatentDirichletAllocation(n_topics=n_topics,
-                                          learning_method='batch')
+    lda_model = LatentDirichletAllocation(n_topics=n_topics,learning_method='batch')
     transformed_docs = lda_model.fit_transform(vectors)
 
     print transformed_docs[0]
@@ -55,5 +47,4 @@ if __name__ == '__main__':
     altered_dataframe = clean_summaries(altered_dataframe)
     altered_dataframe = clean_genres(altered_dataframe)
     p.dump(altered_dataframe, open(FORMATTED_DUMP, 'wb'))
-
-    # transformed_docs = lda_transform(altered_dataframe, 200, LDA_DUMP, LDA_MODEL)
+    transformed_docs = lda_transform(altered_dataframe, 200, LDA_DUMP, LDA_MODEL)
