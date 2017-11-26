@@ -28,7 +28,7 @@ def load_data_and_transform(lda_dump, data_dump):
 def get_train_val_test(lda_dump, dump):
     X, y = load_data_and_transform(lda_dump=lda_dump, data_dump=dump)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
-    return X_train, X_test, y_train, y_test,
+    return X_train, X_test, y_train, y_test
 
 
 def run_model(X_train, y_train):
@@ -36,33 +36,33 @@ def run_model(X_train, y_train):
     model.add(Dense(256, input_dim=X_train.shape[1]))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.3))
 
     model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.3))
 
     model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.3))
 
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.3))
 
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.3))
     model.add(Dense(y_train.shape[1], activation='sigmoid'))
 
     print("[INFO] compiling model...")
     adam = Adam(lr=5e-3)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
-    model.fit(X_train, y_train, validation_split=0.2, epochs=60, batch_size=32)
+    model.fit(X_train, y_train, validation_split=0.2, epochs=60, batch_size=128)
     p.dump(model, open(FC_NET_MODEL, 'wb'))
     return model
 

@@ -6,11 +6,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from src.explore import data_explore as de
 
-DATA_FILE = '../data/booksummaries.txt'
-PICKLE_DUMP = '../data/dataset.p'
-FORMATTED_DUMP = '../data/formatted_data.p'
-LDA_DUMP = '../data/lda_dump.p'
-LDA_MODEL = '../data/lda_model.p'
+DATA_FILE = '../../data/booksummaries.txt'
+PICKLE_DUMP = '../../data/dataset.p'
+FORMATTED_DUMP = '../../data/formatted_data.p'
+LDA_DUMP = '../../data/lda_dump.p'
+LDA_MODEL = '../../data/lda_model.p'
 
 
 def lda_transform(data_frame, n_topics, lda_dump, lda_model_file):

@@ -6,11 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# MACOS
+.DS_STORE
+
 # Distribution / packaging
 .Python
 env/
 build/
 develop-eggs/
+data/
 dist/
 downloads/
 eggs/
