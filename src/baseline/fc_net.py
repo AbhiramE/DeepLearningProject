@@ -63,7 +63,6 @@ def run_model(X_train, y_train):
     adam = Adam(lr=5e-3)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
     model.fit(X_train, y_train, validation_split=0.2, epochs=60, batch_size=128)
-    p.dump(model, open(FC_NET_MODEL, 'wb'))
     return model
 
 
