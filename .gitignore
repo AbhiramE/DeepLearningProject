@@ -107,5 +107,5 @@ ENV/
 #idea
 .idea/
 
-#project
-config*
+# Project
+*.json
