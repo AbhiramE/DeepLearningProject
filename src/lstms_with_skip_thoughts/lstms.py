@@ -2,7 +2,6 @@ import cPickle as p
 import keras.backend as K
 import pandas as pd
 import numpy as np
-
 from sklearn.model_selection import train_test_split
 from keras.layers import Dense, Dropout, Activation
 from keras.models import Sequential

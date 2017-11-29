@@ -1,5 +1,10 @@
 import cPickle as p
-
+import sys
+import json
+root = json.load(open('../../config.json','rb'))['path']
+print root
+sys.path.append(root.encode('utf-8'))
+print sys.path
 import pandas as pd
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
