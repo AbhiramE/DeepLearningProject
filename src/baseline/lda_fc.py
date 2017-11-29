@@ -1,21 +1,21 @@
 import cPickle as p
 import sys
 import json
-root = json.load(open('../../config.json','rb'))['path']
-print root
-sys.path.append(root.encode('utf-8'))
-print sys.path
+import os.path as o
+
+
 import pandas as pd
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
 
 from src.explore import data_explore as de
 
-DATA_FILE = '../../data/booksummaries.txt'
-PICKLE_DUMP = '../../data/dataset.p'
-FORMATTED_DUMP = '../../data/formatted_data.p'
-LDA_DUMP = '../../data/lda_dump.p'
-LDA_MODEL = '../../data/lda_model.p'
+root = o.abspath(o.dirname(__file__))
+DATA_FILE = o.join(root, '../../data/booksummaries.txt')
+PICKLE_DUMP = o.join(root, '../../data/dataset.p')
+FORMATTED_DUMP = o.join(root, '../../data/formatted_data.p')
+LDA_DUMP = o.join(root, '../../data/lda_dump.p')
+LDA_MODEL = o.join(root, '../../data/lda_model.p')
 
 
 def lda_transform(data_frame, n_topics, lda_dump, lda_model_file):
@@ -23,7 +23,7 @@ def lda_transform(data_frame, n_topics, lda_dump, lda_model_file):
 
     tf_vectorizer = CountVectorizer(stop_words='english')
     vectors = tf_vectorizer.fit_transform(summaries)
-    lda_model = LatentDirichletAllocation(n_topics=n_topics,learning_method='batch')
+    lda_model = LatentDirichletAllocation(n_topics=n_topics, learning_method='batch')
     transformed_docs = lda_model.fit_transform(vectors)
 
     print transformed_docs[0]

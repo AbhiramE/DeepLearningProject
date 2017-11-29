@@ -106,3 +106,6 @@ ENV/
 
 #idea
 .idea/
+
+#project
+config*

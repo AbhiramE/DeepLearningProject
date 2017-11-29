@@ -7,10 +7,12 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.layers.normalization import BatchNormalization
+import os.path as o
+root = o.abspath(o.dirname(__file__))
 
-DUMP = '../../data/formatted_data.p'
-LDA_DUMP = '../../data/lda_dump.p'
-FC_NET_MODEL = '../../data/fc_net_model.p'
+DUMP = o.join(root, '../../data/formatted_data.p')
+LDA_DUMP = o.join(root, '../../data/lda_dump.p')
+FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
 
 
 def jaccard_similarity(y_true, y_pred):
