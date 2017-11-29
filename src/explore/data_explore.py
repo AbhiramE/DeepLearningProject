@@ -1,7 +1,8 @@
 import cPickle as p
 import json
 from collections import Counter
-
+import os.path as o
+root = o.abspath(o.dirname(__file__))
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,11 +11,11 @@ from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 
-DATA_FILE = '../data/booksummaries.txt'
-PICKLE_DUMP = '../data/dataset.p'
-FORMATTED_DUMP = '../data/formatted_data.p'
-LDA_DUMP = '../data/lda_dump.p'
-LDA_MODEL = '../data/lda_model.p'
+DATA_FILE = o.join(root, '../../data/booksummaries.txt')
+PICKLE_DUMP = o.join(root, '../../data/dataset.p')
+FORMATTED_DUMP = o.join(root, '../../data/formatted_data.p')
+LDA_DUMP = o.join(root, '../../data/lda_dump.p')
+LDA_MODEL = o.join(root, '../../data/lda_model.p')
 
 
 def read_data(filename, use_dump, dump=None):
