@@ -1,5 +1,6 @@
 import cPickle as p
 
+import numpy as np
 import keras.backend as K
 import pandas as pd
 from keras.layers import Dense, Dropout, Activation
@@ -9,6 +10,8 @@ from sklearn.model_selection import train_test_split
 from keras.layers.normalization import BatchNormalization
 import os.path as o
 root = o.abspath(o.dirname(__file__))
+
+np.random.seed(1234)
 
 DUMP = o.join(root, '../../data/formatted_data.p')
 LDA_DUMP = o.join(root, '../../data/lda_dump.p')

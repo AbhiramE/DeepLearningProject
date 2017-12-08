@@ -13,7 +13,7 @@ MAXED_OUT_DUMP = 'maxed_out_vectors.p'
 DATA_FILE = 'booksummaries.txt'
 PICKLE_DUMP = 'dataset.p'
 FORMATTED_DUMP = 'formatted_data.p'
-
+np.random.seed(1234)
 model = skipthoughts.load_model()
 encoder = skipthoughts.Encoder(model)
 
