@@ -3,6 +3,9 @@ import sys
 import json
 import os.path as o
 
+root = json.load(open('../../config.json', 'rb'))['path']
+sys.path.append(root.encode('utf-8'))
+root = o.abspath(o.dirname(__file__))
 
 import pandas as pd
 from sklearn.decomposition import LatentDirichletAllocation
@@ -10,7 +13,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from src.explore import data_explore as de
 
-root = o.abspath(o.dirname(__file__))
 DATA_FILE = o.join(root, '../../data/booksummaries.txt')
 PICKLE_DUMP = o.join(root, '../../data/dataset.p')
 FORMATTED_DUMP = o.join(root, '../../data/formatted_data.p')
