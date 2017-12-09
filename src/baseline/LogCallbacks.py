@@ -9,6 +9,18 @@ class Logger(Callback):
         super(Logger, self).__init__()
         self.X_val, self.y_true = validation_data
         self.metric_array = []
+        self.jaccard_similarity = []
+
+    def eval_jaccard_similarity(self):
+
+        X_val = self.X_val
+        y_true = self.y_true
+        y_pred = self.model.predict(X_val)
+
+        numerator = np.sum(np.minimum(y_true, y_pred))
+        denominator = np.sum(np.maximum(y_true, y_pred))
+        return numerator/denominator
+
 
     def eval_metric(self):
         X_val = self.X_val
@@ -25,5 +37,8 @@ class Logger(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         score = self.eval_metric()
+        jaccard = self.eval_jaccard_similarity()
         print "\n Accuracy for epoch %d is %f" % (epoch, score)
+        print "\n Jaccard similarity for epoch %d is %f" % (epoch, score)
         self.metric_array.append(score)
+        self.jaccard_similarity.append(jaccard)
