@@ -1,5 +1,6 @@
 import cPickle as p
 
+from LogCallbacks import Logger 
 import numpy as np
 import keras.backend as K
 import numpy as np
@@ -55,6 +56,9 @@ def get_train_val_test(lda_dump, dump):
 
 
 def run_model(X_train, y_train):
+
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=1)
+    v_data = (X_val, y_val)
     model = Sequential()
     model.add(Dense(256, input_dim=X_train.shape[1]))
     model.add(Activation('relu'))
@@ -82,10 +86,12 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
     model.add(Dense(y_train.shape[1], activation='sigmoid'))
 
+    logger = Logger(v_data) 
+
     print("[INFO] compiling model...")
     adam = Adam(lr=5e-3)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
-    model.fit(X_train, y_train, validation_split=0.2, epochs=35, batch_size=128)
+    model.fit(X_train, y_train, validation_data = v_data , epochs=35,batch_size=128, callbacks= [logger])
     return model
 
 
