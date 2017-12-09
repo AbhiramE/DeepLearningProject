@@ -26,6 +26,19 @@ LDA_DUMP = o.join(root, '../../data/lda_dump.p')
 FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
 
 
+'''
+    ###############################################################
+    # Gridsearch tried
+    # self.num_layers = 3, 4, 5
+    # self.layers = [128, 64, 64]
+    # self.dropout = 0.3. 0.4, 0.5
+    # self.input_dim = 200
+    # self.use_batchnorm = True
+    # self.learning_rate = 5e-3, 1e-4, 1e-3, 1e-2, 1e-6          
+    ###############################################################
+'''
+
+
 def read_data(filename, use_dump, dump=None):
     # Whether or not to use pickle dump
     if not use_dump:
@@ -68,6 +81,7 @@ def clean_genres(data_frame):
     data_frame = pd.DataFrame(data_frame['summary'])
     alt_frame = alt_frame[alt_frame.columns[(alt_frame.sum() > 100)]]
     data_frame = pd.concat([data_frame, alt_frame], axis=1)
+    data_frame = data_frame[(data_frame.loc[:, data_frame.columns != 'summary'].T != 0).any()]
     return data_frame
 
 
