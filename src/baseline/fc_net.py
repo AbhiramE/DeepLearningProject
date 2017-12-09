@@ -1,5 +1,6 @@
 import cPickle as p
 
+import numpy as np
 import keras.backend as K
 import numpy as np
 import pandas as pd
@@ -11,6 +12,8 @@ from keras.layers.normalization import BatchNormalization
 import os.path as o
 
 root = o.abspath(o.dirname(__file__))
+
+np.random.seed(1234)
 
 DUMP = o.join(root, '../../data/formatted_data.p')
 LDA_DUMP = o.join(root, '../../data/lda_dump.p')
