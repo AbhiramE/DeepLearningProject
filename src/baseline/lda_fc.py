@@ -45,6 +45,7 @@ def clean_genres(data_frame):
     data_frame = pd.DataFrame(data_frame['summary'])
     alt_frame = alt_frame[alt_frame.columns[(alt_frame.sum() > 100)]]
     data_frame = pd.concat([data_frame, alt_frame], axis=1)
+    data_frame = data_frame[(data_frame.loc[:, data_frame.columns != 'summary'].T != 0).any()]
     return data_frame
 
 
