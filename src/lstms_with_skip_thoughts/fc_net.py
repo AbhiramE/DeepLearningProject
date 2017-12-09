@@ -12,17 +12,19 @@ from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.layers.normalization import BatchNormalization
 from sklearn.preprocessing import MultiLabelBinarizer
-#from src.explore import data_explore as de
+# from src.explore import data_explore as de
 import os.path as o
+
 root = o.abspath(o.dirname(__file__))
 
 DUMP = o.join(root, '../../data/booksummaries.txt')
 DATA_DUMP = o.join(root, '../../data/formatted_dump.p')
-VEC_DUMP = o.join(root,'../../data/vectors.p')
-AVG_DUMP = o.join(root,'../../data/averaged_vectors.p')
-MAX_DUMP = o.join(root,'../../data/maxed_out_vectors.p')
+VEC_DUMP = o.join(root, '../../data/vectors.p')
+AVG_DUMP = o.join(root, '../../data/averaged_vectors.p')
+MAX_DUMP = o.join(root, '../../data/maxed_out_vectors.p')
 LDA_DUMP = o.join(root, '../../data/lda_dump.p')
 FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
+
 
 def read_data(filename, use_dump, dump=None):
     # Whether or not to use pickle dump
@@ -36,7 +38,7 @@ def read_data(filename, use_dump, dump=None):
         for i in range(len(genres)):
             genres[i] = [x.encode('utf-8') for x in json.loads(genres[i]).values()]
         all_data['genres'] = pd.Series(genres)
-        #p.dump(all_data, open(dump, 'wb'))
+        # p.dump(all_data, open(dump, 'wb'))
     else:
         all_data = p.load(open(dump, 'rb'))
     return all_data
@@ -55,6 +57,7 @@ def format_data(data_frame, dump):
     p.dump(adf, open(dump, 'wb'))
     return adf
 
+
 def clean_summaries(data_frame):
     new_df = pd.DataFrame(data_frame['summary'].str.split(' ').str.len())
     return data_frame[(new_df['summary'] >= 50) & (new_df['summary'] <= 2500)]
@@ -69,17 +72,16 @@ def clean_genres(data_frame):
 
 
 def jaccard_similarity(y_true, y_pred):
-        y_int = y_true * y_pred
-        return -(2 * K.sum(y_int) / (K.sum(y_true) + K.sum(y_pred)))
+    y_int = y_true * y_pred
+    return -(2 * K.sum(y_int) / (K.sum(y_true) + K.sum(y_pred)))
 
 
 def load_data_and_transform(vector_dump, data_dump):
-    
     df = read_data(DUMP, use_dump=False)
     df = format_data(df, DATA_DUMP)
     df = clean_summaries(df)
     df = clean_genres(df)
-    #df = p.load(open(data_dump, 'rb'))
+    # df = p.load(open(data_dump, 'rb'))
     data_frame = p.load(open(vector_dump, 'rb'))
     alt_frame = df.drop('summary', axis=1)
     return data_frame, alt_frame
@@ -135,7 +137,6 @@ def predict(model, X_val):
 
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(MAX_DUMP, DUMP)
-    print X_train.shape
     fc_net_model = run_model(X_train, pd.DataFrame.as_matrix(y_train))
     # results = predict(fc_net_model, X_val)
     # print results
