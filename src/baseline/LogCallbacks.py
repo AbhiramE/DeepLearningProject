@@ -33,17 +33,16 @@ class Logger(Callback):
         correct_pred = 0
         sum_metric2 = 0.0
         for i in xrange(len(y_pred)):
-            print y_true_cols[i]
             pred_indices = np.argsort(y_pred[i])[-y_true_cols[i]:][::-1]
             true_indices = np.argsort(y_true[i])[-y_true_cols[i]:][::-1]
             intersect =  np.intersect1d(pred_indices, true_indices)
             if len(intersect) > 0:
                 correct_pred += 1
-            #sum_metric2+=float(len(intersect))/y_true_cols[i]
+            sum_metric2+=float(len(intersect))/y_true_cols[i]
         return float(correct_pred) / len(X_val), sum_metric2/len(y_true)
 
     def on_batch_end(self, batch, logs={}):
-        print "Logging train loss!"
+        #print "Logging train loss!"
         self.train_loss.append(logs['loss'])
     
     def on_epoch_end(self, epoch, logs={}):

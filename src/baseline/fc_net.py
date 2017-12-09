@@ -46,35 +46,36 @@ def run_model(X_train, y_train):
     model.add(Dense(256, input_dim=X_train.shape[1]))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.1))
 
     model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.1))
 
     model.add(Dense(128))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.1))
 
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.1))
 
     model.add(Dense(64))
     model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.1))
     model.add(Dense(y_train.shape[1], activation='sigmoid'))
 
     logger = Logger(validation_data=(X_val, y_val))
 
     print("[INFO] compiling model...")
-    adam = Adam(lr=5e-3)
+    adam = Adam(lr=5e-5)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
-    history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=35, batch_size=128, callbacks=[logger])
+    history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
+                        epochs=400, batch_size=128, callbacks=[logger])
 
     return model, logger, history
 
@@ -85,6 +86,30 @@ def plot_loss(logger):
     x_axis = range(len(train_loss))
     sns.tsplot(data=train_loss, time=x_axis, value='Loss',legend = True)
     #sns.tsplot(data=val_loss, tim=x_axis, value='Loss',legend = True)
+    plt.show()
+
+def plot_losses(history):
+
+    train_loss = history.history['loss']
+    val_loss = history.history['val_loss']
+    x_axis = range(len(train_loss))
+    sns.tsplot(data=train_loss, time=x_axis, value='Loss',legend = True,color="g")
+    sns.tsplot(data=val_loss, time=x_axis, value='Loss',legend = True, color="b")
+
+def plot_metrics(logger):
+
+    jaccard = logger.jaccard_similarity
+    metric1 = logger.metric1_array
+    metric2 = logger.metric2_array
+    
+    print len(jaccard)
+    print len(metric1)
+    print len(metric2)
+    x_axis = range(len(jaccard))
+    
+    sns.tsplot(data=jaccard, time=x_axis, value='Loss',legend = True)
+    sns.tsplot(data=metric1, time=x_axis, value='Loss',legend = True)
+    sns.tsplot(data=metric2, time=x_axis, value='Loss',legend = True)
     plt.show()
 
 
@@ -105,7 +130,8 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
     fc_net_model, logger, history = run_model(X_train, pd.DataFrame.as_matrix(y_train))
-    plot_loss(logger)
+    #plot_loss(logger)
+    plot_losses(history)
     #results = predict(fc_net_model, X_test, y_test.as_matrix())
     #print(results)
     # print results
