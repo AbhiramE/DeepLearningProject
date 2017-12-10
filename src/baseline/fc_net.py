@@ -125,36 +125,38 @@ def run_model(X_train, y_train):
 
 def plot_loss(logger):
     train_loss = logger.train_loss
-    # val_loss = logger.val_loss
     x_axis = range(len(train_loss))
-    sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
-    # sns.tsplot(data=val_loss, tim=x_axis, value='Loss',legend = True)
+    sns_plot = sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
     plt.show()
+    fig = sns_plot.get_figure()
+    fig.savefig('../../data/loss.png')
 
 
 def plot_losses(history):
     train_loss = history.history['loss']
     val_loss = history.history['val_loss']
+
+    fig = plt.figure()
     x_axis = range(len(train_loss))
-    sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True, color="g")
-    sns.tsplot(data=val_loss, time=x_axis, value='Loss', legend=True, color="b")
+    plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
+    plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
+    plt.legend(loc='best')
     plt.show()
+    fig.savefig('../../data/validation_vs_training_loss.png')
 
 
 def plot_metrics(logger):
-    jaccard = logger.jaccard_similarity
-    metric1 = logger.metric1_array
-    metric2 = logger.metric2_array
+    jaccard = pd.Series(logger.jaccard_similarity)
+    metric1 = pd.Series(logger.metric1_array)
+    metric2 = pd.Series(logger.metric2_array)
 
-    print len(jaccard)
-    print len(metric1)
-    print len(metric2)
-    x_axis = range(len(jaccard))
-
-    sns.tsplot(data=jaccard, time=x_axis, value='Loss', legend=True)
-    sns.tsplot(data=metric1, time=x_axis, value='Loss', legend=True)
-    sns.tsplot(data=metric2, time=x_axis, value='Loss', legend=True)
+    fig = plt.figure()
+    plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
+    plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
+    plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
+    plt.legend(loc='best')
     plt.show()
+    fig.savefig('../../data/metrics.png')
 
 
 def predict(model, X_val, y_true):
@@ -182,9 +184,9 @@ def test(model, X_val, df):
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
-    fc_net_model, logger, history = run_model(X_train, pd.DataFrame.as_matrix(y_train))
+    fc_net_model, logger, hist = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
     plot_loss(logger)
-    plot_losses(history)
+    plot_losses(hist)
     plot_metrics(logger)
     # results = predict(fc_net_model, X_test, y_test.as_matrix())
     # print(results)
