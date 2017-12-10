@@ -31,14 +31,14 @@ def jaccard_similarity(y_true, y_pred):
 def load_data_and_transform(lda_dump, data_dump):
     df = p.load(open(data_dump, 'rb'))
     data_frame = p.load(open(lda_dump, 'rb'))
-    alt_frame = df.drop('summary', axis=1)
-    return data_frame, alt_frame
+    return data_frame, df
 
 
 def get_train_val_test(lda_dump, dump):
     X, y = load_data_and_transform(lda_dump=lda_dump, data_dump=dump)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
     return X_train, X_test, y_train, y_test
+
 
 def run_model(X_train, y_train):
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
@@ -72,44 +72,44 @@ def run_model(X_train, y_train):
     logger = Logger(validation_data=(X_val, y_val))
 
     print("[INFO] compiling model...")
+
     adam = Adam(lr=5e-5)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
                         epochs=400, batch_size=128, callbacks=[logger])
-
     return model, logger, history
 
-def plot_loss(logger):
 
-    train_loss =  logger.train_loss
-    #val_loss = logger.val_loss
+def plot_loss(logger):
+    train_loss = logger.train_loss
+    # val_loss = logger.val_loss
     x_axis = range(len(train_loss))
-    sns.tsplot(data=train_loss, time=x_axis, value='Loss',legend = True)
-    #sns.tsplot(data=val_loss, tim=x_axis, value='Loss',legend = True)
+    sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
+    # sns.tsplot(data=val_loss, tim=x_axis, value='Loss',legend = True)
     plt.show()
 
-def plot_losses(history):
 
+def plot_losses(history):
     train_loss = history.history['loss']
     val_loss = history.history['val_loss']
     x_axis = range(len(train_loss))
-    sns.tsplot(data=train_loss, time=x_axis, value='Loss',legend = True,color="g")
-    sns.tsplot(data=val_loss, time=x_axis, value='Loss',legend = True, color="b")
+    sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True, color="g")
+    sns.tsplot(data=val_loss, time=x_axis, value='Loss', legend=True, color="b")
+
 
 def plot_metrics(logger):
-
     jaccard = logger.jaccard_similarity
     metric1 = logger.metric1_array
     metric2 = logger.metric2_array
-    
+
     print len(jaccard)
     print len(metric1)
     print len(metric2)
     x_axis = range(len(jaccard))
-    
-    sns.tsplot(data=jaccard, time=x_axis, value='Loss',legend = True)
-    sns.tsplot(data=metric1, time=x_axis, value='Loss',legend = True)
-    sns.tsplot(data=metric2, time=x_axis, value='Loss',legend = True)
+
+    sns.tsplot(data=jaccard, time=x_axis, value='Loss', legend=True)
+    sns.tsplot(data=metric1, time=x_axis, value='Loss', legend=True)
+    sns.tsplot(data=metric2, time=x_axis, value='Loss', legend=True)
     plt.show()
 
 
@@ -122,16 +122,23 @@ def predict(model, X_val, y_true):
         true_indices = np.argsort(y_true[i])[-y_true_cols[i]:][::-1]
         if len(np.intersect1d(pred_indices, true_indices)) > 0:
             correct_pred += 1
-
     return float(correct_pred) / len(y_pred)
+
+
+def test(model, X_val, df):
+    y_pred = model.predict(X_val)
+    sample = np.random.randint(0, 20)
+    pred_indices = np.argsort(y_pred[sample])[-3:][::-1]
+
+    print "\n \n \nLets try a test sample..."
+    print(df.as_matrix()[sample][0])
+    print (df.columns[pred_indices])
 
 
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
-    print X_train.shape
-    fc_net_model, logger, history = run_model(X_train, pd.DataFrame.as_matrix(y_train))
-    #plot_loss(logger)
-    plot_losses(history)
-    #results = predict(fc_net_model, X_test, y_test.as_matrix())
-    #print(results)
-    # print results
+    fc_net_model, logger, history = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
+    plot_loss(logger)
+    results = predict(fc_net_model, X_test, y_test.drop('summary', axis=1).as_matrix())
+    test(fc_net_model, X_test[:20, :], y_test)
+    # print(results)

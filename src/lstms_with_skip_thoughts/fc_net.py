@@ -25,7 +25,6 @@ MAX_DUMP = o.join(root, '../../data/maxed_out_vectors.p')
 LDA_DUMP = o.join(root, '../../data/lda_dump.p')
 FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
 
-
 '''
     ###############################################################
     # Gridsearch tried
@@ -152,5 +151,5 @@ def predict(model, X_val):
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(MAX_DUMP, DUMP)
     fc_net_model = run_model(X_train, pd.DataFrame.as_matrix(y_train))
-    # results = predict(fc_net_model, X_val)
-    # print results
+    results = predict(fc_net_model, X_test)
+    print results

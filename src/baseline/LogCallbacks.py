@@ -22,8 +22,7 @@ class Logger(Callback):
 
         numerator = np.sum(np.minimum(y_true, y_pred))
         denominator = np.sum(np.maximum(y_true, y_pred))
-        return numerator/denominator
-
+        return numerator / denominator
 
     def eval_metrics(self):
         X_val = self.X_val
@@ -35,24 +34,23 @@ class Logger(Callback):
         for i in xrange(len(y_pred)):
             pred_indices = np.argsort(y_pred[i])[-y_true_cols[i]:][::-1]
             true_indices = np.argsort(y_true[i])[-y_true_cols[i]:][::-1]
-            intersect =  np.intersect1d(pred_indices, true_indices)
+            intersect = np.intersect1d(pred_indices, true_indices)
             if len(intersect) > 0:
                 correct_pred += 1
-            sum_metric2+=float(len(intersect))/y_true_cols[i]
-        return float(correct_pred) / len(X_val), sum_metric2/len(y_true)
+            sum_metric2 += float(len(intersect)) / y_true_cols[i]
+        return float(correct_pred) / len(X_val), sum_metric2 / len(y_true)
 
     def on_batch_end(self, batch, logs={}):
-        #print "Logging train loss!"
         self.train_loss.append(logs['loss'])
-    
+
     def on_epoch_end(self, epoch, logs={}):
-        
+
         score1, score2 = self.eval_metrics()
         jaccard = self.eval_jaccard_similarity()
         print "\n Accuracy1 for epoch %d is %f" % (epoch, score1)
         print "\n Accuracy2 for epoch %d is %f" % (epoch, score2)
         print "\n Jaccard similarity for epoch %d is %f" % (epoch, jaccard)
-        
+
         self.metric1_array.append(score1)
         self.metric2_array.append(score2)
         self.jaccard_similarity.append(jaccard)

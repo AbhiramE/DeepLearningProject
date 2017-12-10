@@ -8,6 +8,7 @@ sys.path.append(root.encode('utf-8'))
 root = o.abspath(o.dirname(__file__))
 
 import pandas as pd
+import numpy as np
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -27,8 +28,6 @@ def lda_transform(data_frame, n_topics, lda_dump, lda_model_file):
     vectors = tf_vectorizer.fit_transform(summaries)
     lda_model = LatentDirichletAllocation(n_topics=n_topics, learning_method='batch')
     transformed_docs = lda_model.fit_transform(vectors)
-
-    print transformed_docs[0]
     p.dump(transformed_docs, open(lda_dump, 'wb'))
     p.dump(lda_model, open(lda_model_file, 'wb'))
 
