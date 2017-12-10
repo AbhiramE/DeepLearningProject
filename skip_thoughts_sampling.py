@@ -26,13 +26,14 @@ def clean_summaries(data_frame):
     new_df = pd.DataFrame(data_frame['summary'].str.split(' ').str.len())
     return data_frame[(new_df['summary'] >= 50) & (new_df['summary'] <= 2500)]
 
-
 def clean_genres(data_frame):
     alt_frame = data_frame.drop('summary', axis=1)
     data_frame = pd.DataFrame(data_frame['summary'])
     alt_frame = alt_frame[alt_frame.columns[(alt_frame.sum() > 100)]]
     data_frame = pd.concat([data_frame, alt_frame], axis=1)
+    data_frame = data_frame[(data_frame.loc[:, data_frame.columns != 'summary'].T != 0).any()]
     return data_frame
+
 
 
 if __name__ == '__main__':
