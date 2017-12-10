@@ -7,7 +7,8 @@ import keras.backend as K
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from keras.layers import Dense, Dropout, Activation
+from keras.layers import Dense, Dropout, Activation, PReLU
+from keras import regularizers
 from keras.models import Sequential
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
@@ -25,7 +26,7 @@ FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
 
 def jaccard_similarity(y_true, y_pred):
     y_int = y_true * y_pred
-    return -(2 * K.sum(y_int) / (K.sum(y_true) + K.sum(y_pred)))
+    return K.logsumexp(-(2.0 * K.sum(y_int) / (K.sum(y_true) + K.sum(y_pred))))
 
 
 def load_data_and_transform(lda_dump, data_dump):
@@ -43,39 +44,81 @@ def get_train_val_test(lda_dump, dump):
 def run_model(X_train, y_train):
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
     model = Sequential()
-    model.add(Dense(256, input_dim=X_train.shape[1]))
-    model.add(Activation('relu'))
+    
+    # Layer 1
+    model.add(Dense(256, input_dim=X_train.shape[1],kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
+    model.add(Dropout(0.2))
+ 
+    # Layer 2
+    model.add(Dense(256,kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)))
 
-    model.add(Dense(128))
-    model.add(Activation('relu'))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(PReLU(alpha_initializer='zeros',
+                    alpha_regularizer=regularizers.l2(1e-4),
+                    alpha_constraint=None))
+    model.add(Dropout(0.2))
 
-    model.add(Dense(128))
-    model.add(Activation('relu'))
+    # Layer 3
+    model.add(Dense(256,
+              kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)
+              ))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
+    model.add(Dropout(0.2))
+     
+    # Layer 4
+    model.add(Dense(256,
+              kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)
+              ))
+    model.add(BatchNormalization())
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
+    model.add(Dropout(0.2))
+   
+    # Layer 5
+    model.add(Dense(256,
+              kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)
+              ))
 
-    model.add(Dense(64))
-    model.add(Activation('relu'))
+    model.add(Dropout(0.2))
+    
+    model.add(PReLU(alpha_initializer='zeros',
+                    alpha_regularizer=regularizers.l2(1e-4),
+                    alpha_constraint=None))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
-
-    model.add(Dense(64))
-    model.add(Activation('relu'))
+    model.add(Dropout(0.2))
+    
+    # Layer 6
+    model.add(Dense(256,
+              kernel_regularizer=regularizers.l2(1e-5),
+              bias_regularizer = regularizers.l2(0),
+              activity_regularizer=regularizers.l2(0)
+              ))
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(BatchNormalization())
-    model.add(Dropout(0.1))
+    model.add(Dropout(0.2))
+    
+    #Output
     model.add(Dense(y_train.shape[1], activation='sigmoid'))
 
     logger = Logger(validation_data=(X_val, y_val))
 
     print("[INFO] compiling model...")
-    adam = Adam(lr=5e-5)
+    adam = Adam(lr=5e-3)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
-                        epochs=400, batch_size=128, callbacks=[logger])
+                        epochs=60, batch_size=128, callbacks=[logger])
 
     return model, logger, history
 
@@ -95,6 +138,7 @@ def plot_losses(history):
     x_axis = range(len(train_loss))
     sns.tsplot(data=train_loss, time=x_axis, value='Loss',legend = True,color="g")
     sns.tsplot(data=val_loss, time=x_axis, value='Loss',legend = True, color="b")
+    plt.show()
 
 def plot_metrics(logger):
 
@@ -130,8 +174,9 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
     fc_net_model, logger, history = run_model(X_train, pd.DataFrame.as_matrix(y_train))
-    #plot_loss(logger)
+    plot_loss(logger)
     plot_losses(history)
+    plot_metrics(logger)
     #results = predict(fc_net_model, X_test, y_test.as_matrix())
     #print(results)
     # print results
