@@ -94,13 +94,10 @@ def run_model(X_train, y_train):
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-
-    model.add(Dropout(0.2))
-
+    model.add(BatchNormalization())
     model.add(PReLU(alpha_initializer='zeros',
                     alpha_regularizer=regularizers.l2(1e-4),
                     alpha_constraint=None))
-    model.add(BatchNormalization())
     model.add(Dropout(0.2))
 
     # Layer 6
@@ -109,8 +106,8 @@ def run_model(X_train, y_train):
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(BatchNormalization())
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(Dropout(0.2))
 
     # Output
