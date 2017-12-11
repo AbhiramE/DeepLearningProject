@@ -22,6 +22,10 @@ np.random.seed(1234)
 DUMP = o.join(root, '../../data/formatted_data.p')
 LDA_DUMP = o.join(root, '../../data/lda_dump.p')
 FC_NET_MODEL = o.join(root, '../../data/fc_net_model.p')
+LOGGER_DUMP_LOSS = o.join(root, '../../data/kld_logger_loss.p')
+LOGGER_DUMP_METRIC1 = o.join(root, '../../data/kld_logger_m1.p')
+LOGGER_DUMP_METRIC2 = o.join(root, '../../data/kld_logger_m2.p')
+LOGGER_DUMP_JS = o.join(root, '../../data/kld_logger_js.p')
 
 
 def jaccard_similarity(y_true, y_pred):
@@ -125,10 +129,13 @@ def run_model(X_train, y_train):
 
 def plot_loss(logger):
     train_loss = logger.train_loss
+    train_loss2 = p.load(open(LOGGER_DUMP_LOSS, 'rb'))
+    fig = plt.figure()
     x_axis = range(len(train_loss))
-    sns_plot = sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
+    plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
+    plt.plot(x_axis, train_loss2, 'g-', label='Training Loss(KLD)')
+    plt.legend(loc='best')
     plt.show()
-    fig = sns_plot.get_figure()
     fig.savefig('../../data/loss.png')
 
 
@@ -154,6 +161,15 @@ def plot_metrics(logger):
     plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
     plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
     plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
+
+    jaccard2 = pd.Series(p.load(open(LOGGER_DUMP_JS, 'rb')))
+    metric12 = pd.Series(p.load(open(LOGGER_DUMP_METRIC1, 'rb')))
+    metric22 = pd.Series(p.load(open(LOGGER_DUMP_METRIC2, 'rb')))
+
+    plt.plot(range(len(jaccard2)), jaccard2, 'b--', label='Jaccard(KLD)')
+    plt.plot(range(len(metric12)), metric12, 'g--', label='Best 1 metric(KLD)')
+    plt.plot(range(len(metric22)), metric22, 'r--', label='Best k metric(KLD)')
+
     plt.legend(loc='best')
     plt.show()
     fig.savefig('../../data/metrics.png')
@@ -185,6 +201,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
     fc_net_model, logger, hist = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
+
     plot_loss(logger)
     plot_losses(hist)
     plot_metrics(logger)
