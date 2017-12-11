@@ -124,10 +124,12 @@ def run_model(X_train, y_train):
 def plot_loss(logger):
     train_loss = logger.train_loss
     x_axis = range(len(train_loss))
-    sns_plot = sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
-    plt.show()
-    fig = sns_plot.get_figure()
-    fig.savefig('../../data/loss.png')
+    fig = plt.figure()
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss")
+    plt.plot(x_axis, train_loss, 'b-')
+    #plt.show()
+    fig.savefig('../../data/loss_skipthoughts.png', dpi=1000)
 
 
 def plot_losses(history):
@@ -136,11 +138,13 @@ def plot_losses(history):
 
     fig = plt.figure()
     x_axis = range(len(train_loss))
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/validation_vs_training_loss.png')
+    #plt.show()
+    fig.savefig('../../data/validation_vs_training_loss_skipthoughts.png',dpi=1000)
 
 
 def plot_metrics(logger):
@@ -149,12 +153,14 @@ def plot_metrics(logger):
     metric2 = pd.Series(logger.metric2_array)
 
     fig = plt.figure()
+    plt.xlabel("Epoch")
+    plt.ylabel("Metric")
     plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
     plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
     plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/metrics.png')
+    #plt.show()
+    fig.savefig('../../data/metrics_skipthoughts.png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
