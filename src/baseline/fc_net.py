@@ -94,13 +94,10 @@ def run_model(X_train, y_train):
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-
-    model.add(Dropout(0.2))
-
+    model.add(BatchNormalization())
     model.add(PReLU(alpha_initializer='zeros',
                     alpha_regularizer=regularizers.l2(1e-4),
                     alpha_constraint=None))
-    model.add(BatchNormalization())
     model.add(Dropout(0.2))
 
     # Layer 6
@@ -109,8 +106,8 @@ def run_model(X_train, y_train):
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(BatchNormalization())
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(Dropout(0.2))
 
     # Output
@@ -120,7 +117,7 @@ def run_model(X_train, y_train):
 
     print("[INFO] compiling model...")
     adam = Adam(lr=5e-5)
-    model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
+    model.compile(loss='kullback_leibler_divergence', optimizer=adam, metrics=[jaccard_similarity])
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
                         epochs=400, batch_size=128, callbacks=[logger])
 
@@ -132,11 +129,14 @@ def plot_loss(logger):
     train_loss2 = p.load(open(LOGGER_DUMP_LOSS, 'rb'))
     fig = plt.figure()
     x_axis = range(len(train_loss))
+    plt.xlabel("Iterations")
+    plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
     plt.plot(x_axis, train_loss2, 'g-', label='Training Loss(KLD)')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/loss.png')
+    #plt.show()
+    #plt.close('all')
+    fig.savefig('../../data/loss_lda.png',format='png', dpi=1000)
 
 
 def plot_losses(history):
@@ -145,19 +145,23 @@ def plot_losses(history):
 
     fig = plt.figure()
     x_axis = range(len(train_loss))
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/validation_vs_training_loss.png')
-
-
+    #plt.show()
+    #plt.close('all')
+    fig.savefig('../../data/validation_vs_training_loss_lda.png',
+                format='png', dpi=1000)
 def plot_metrics(logger):
     jaccard = pd.Series(logger.jaccard_similarity)
     metric1 = pd.Series(logger.metric1_array)
     metric2 = pd.Series(logger.metric2_array)
 
     fig = plt.figure()
+    plt.xlabel("Epochs")
+    plt.ylabel("Metric value")
     plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
     plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
     plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
@@ -171,8 +175,9 @@ def plot_metrics(logger):
     plt.plot(range(len(metric22)), metric22, 'r--', label='Best k metric(KLD)')
 
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/metrics.png')
+    #plt.show()
+    #plt.close('all')
+    fig.savefig('../../data/metrics_lda.png',format='png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
@@ -201,7 +206,10 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
     fc_net_model, logger, hist = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
-
+    p.dump(logger.train_loss,open(LOGGER_DUMP_LOSS, 'wb'))
+    p.dump(logger.jaccard_similarity, open(LOGGER_DUMP_JS, 'wb'))
+    p.dump(logger.metric1_array, open(LOGGER_DUMP_METRIC1, 'wb'))
+    p.dump(logger.metric2_array, open(LOGGER_DUMP_METRIC2, 'wb'))
     plot_loss(logger)
     plot_losses(hist)
     plot_metrics(logger)

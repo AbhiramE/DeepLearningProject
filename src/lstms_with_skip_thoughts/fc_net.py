@@ -47,7 +47,7 @@ def run_model(X_train, y_train):
     model = Sequential()
 
     # Layer 1
-    model.add(Dense(2400, input_dim=X_train.shape[1], kernel_regularizer=regularizers.l2(1e-3),
+    model.add(Dense(256, input_dim=X_train.shape[1], kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)))
     model.add(BatchNormalization())
@@ -55,7 +55,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 2
-    model.add(Dense(1200, kernel_regularizer=regularizers.l2(1e-3),
+    model.add(Dense(256, kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)))
 
@@ -66,7 +66,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 3
-    model.add(Dense(600,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -76,7 +76,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 4
-    model.add(Dense(300,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -86,28 +86,25 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 5
-    model.add(Dense(150,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-
-    model.add(Dropout(0.3))
-
+    model.add(BatchNormalization())
     model.add(PReLU(alpha_initializer='zeros',
                     alpha_regularizer=regularizers.l2(1e-4),
                     alpha_constraint=None))
-    model.add(BatchNormalization())
     model.add(Dropout(0.3))
 
     # Layer 6
-    model.add(Dense(75,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
                     ))
-    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(BatchNormalization())
+    model.add(PReLU(alpha_initializer='zeros', alpha_regularizer=regularizers.l2(1e-4), alpha_constraint=None))
     model.add(Dropout(0.3))
 
     # Output
@@ -127,10 +124,12 @@ def run_model(X_train, y_train):
 def plot_loss(logger):
     train_loss = logger.train_loss
     x_axis = range(len(train_loss))
-    sns_plot = sns.tsplot(data=train_loss, time=x_axis, value='Loss', legend=True)
-    plt.show()
-    fig = sns_plot.get_figure()
-    fig.savefig('../../data/loss.png')
+    fig = plt.figure()
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss")
+    plt.plot(x_axis, train_loss, 'b-')
+    #plt.show()
+    fig.savefig('../../data/loss_skipthoughts_avg_small.png', dpi=1000)
 
 
 def plot_losses(history):
@@ -139,11 +138,13 @@ def plot_losses(history):
 
     fig = plt.figure()
     x_axis = range(len(train_loss))
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/validation_vs_training_loss.png')
+    #plt.show()
+    fig.savefig('../../data/validation_vs_training_loss_skipthoughts_avg_small.png',dpi=1000)
 
 
 def plot_metrics(logger):
@@ -152,12 +153,14 @@ def plot_metrics(logger):
     metric2 = pd.Series(logger.metric2_array)
 
     fig = plt.figure()
+    plt.xlabel("Epoch")
+    plt.ylabel("Metric")
     plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
     plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
     plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
     plt.legend(loc='best')
-    plt.show()
-    fig.savefig('../../data/metrics.png')
+    #plt.show()
+    fig.savefig('../../data/metrics_skipthoughts_avg_small.png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
