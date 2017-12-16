@@ -47,7 +47,7 @@ def run_model(X_train, y_train):
     model = Sequential()
 
     # Layer 1
-    model.add(Dense(2400, input_dim=X_train.shape[1], kernel_regularizer=regularizers.l2(1e-3),
+    model.add(Dense(256, input_dim=X_train.shape[1], kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)))
     model.add(BatchNormalization())
@@ -55,7 +55,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 2
-    model.add(Dense(1200, kernel_regularizer=regularizers.l2(1e-3),
+    model.add(Dense(256, kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)))
 
@@ -66,7 +66,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 3
-    model.add(Dense(600,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -76,7 +76,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 4
-    model.add(Dense(300,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -86,7 +86,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 5
-    model.add(Dense(150,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -98,7 +98,7 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.3))
 
     # Layer 6
-    model.add(Dense(75,
+    model.add(Dense(256,
                     kernel_regularizer=regularizers.l2(1e-3),
                     bias_regularizer=regularizers.l2(0),
                     activity_regularizer=regularizers.l2(0)
@@ -129,7 +129,7 @@ def plot_loss(logger):
     plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-')
     #plt.show()
-    fig.savefig('../../data/loss_skipthoughts.png', dpi=1000)
+    fig.savefig('../../data/loss_skipthoughts_avg_small.png', dpi=1000)
 
 
 def plot_losses(history):
@@ -144,7 +144,7 @@ def plot_losses(history):
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
     #plt.show()
-    fig.savefig('../../data/validation_vs_training_loss_skipthoughts.png',dpi=1000)
+    fig.savefig('../../data/validation_vs_training_loss_skipthoughts_avg_small.png',dpi=1000)
 
 
 def plot_metrics(logger):
@@ -160,7 +160,7 @@ def plot_metrics(logger):
     plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
     plt.legend(loc='best')
     #plt.show()
-    fig.savefig('../../data/metrics_skipthoughts.png', dpi=1000)
+    fig.savefig('../../data/metrics_skipthoughts_avg_small.png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
