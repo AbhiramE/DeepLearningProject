@@ -54,4 +54,4 @@ if __name__ == '__main__':
     altered_dataframe = clean_summaries(altered_dataframe)
     altered_dataframe = clean_genres(altered_dataframe)
     p.dump(altered_dataframe, open(FORMATTED_DUMP, 'wb'))
-    transformed_docs = lda_transform(altered_dataframe, 400, LDA_DUMP, LDA_MODEL)
+    transformed_docs = lda_transform(altered_dataframe, 200, LDA_DUMP, LDA_MODEL)
