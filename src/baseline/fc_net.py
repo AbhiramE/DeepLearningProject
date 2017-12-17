@@ -13,11 +13,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.layers.normalization import BatchNormalization
-from sklearn.metrics import matthews_corrcoef
 import os.path as o
-
-
-CLASS_THRESHOLD = [0.3,0.3,0.2,0.3,0.2,0.1,0.1,0.2,0.6,0.3,0.1,0.2,0.2,0.2,0.3, 0.1,0.2,0.1,0.1,0.1,0.3,0.1]
 
 root = o.abspath(o.dirname(__file__))
 
@@ -115,15 +111,15 @@ def run_model(X_train, y_train):
     model.add(Dropout(0.2))
 
     # Output
-    model.add(Dense(y_train.shape[1]))
-    model.add(Activation(K.sigmoid))
+    model.add(Dense(y_train.shape[1], activation='sigmoid'))
+
     logger = Logger(validation_data=(X_val, y_val))
 
     print("[INFO] compiling model...")
     adam = Adam(lr=5e-5)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
-                        epochs=200, batch_size=128, callbacks=[logger])
+                        epochs=400, batch_size=128, callbacks=[logger])
 
     return model, logger, history
 
@@ -139,7 +135,8 @@ def plot_loss(logger):
     plt.plot(x_axis, train_loss2, 'g-', label='Training Loss(KLD)')
     plt.legend(loc='best')
     plt.show()
-    fig.savefig('../../data/loss.png', dpi=1000)
+    # plt.close('all')
+    fig.savefig('../../data/loss_lda.png', format='png', dpi=1000)
 
 
 def plot_losses(history):
@@ -154,7 +151,9 @@ def plot_losses(history):
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
     plt.show()
-    fig.savefig('../../data/validation_vs_training_loss.png', dpi=1000)
+    #plt.close('all')
+    fig.savefig('../../data/validation_vs_training_loss_lda.png',
+                format='png', dpi=1000)
 
 
 def plot_metrics(logger):
@@ -163,34 +162,30 @@ def plot_metrics(logger):
     metric2 = pd.Series(logger.metric2_array)
 
     fig = plt.figure()
+    plt.xlabel("Epochs")
+    plt.ylabel("Metric value")
     plt.plot(range(len(jaccard)), jaccard, 'b-', label='Jaccard')
-    plt.plot(range(len(metric1)), metric1, 'g-', label='Best 1 metric')
-    plt.plot(range(len(metric2)), metric2, 'r-', label='Best k metric')
+    plt.plot(range(len(metric1)), metric1, 'g-', label='Accuracy')
+    plt.plot(range(len(metric2)), metric2, 'r-', label='Precision')
 
     jaccard2 = pd.Series(p.load(open(LOGGER_DUMP_JS, 'rb')))
     metric12 = pd.Series(p.load(open(LOGGER_DUMP_METRIC1, 'rb')))
     metric22 = pd.Series(p.load(open(LOGGER_DUMP_METRIC2, 'rb')))
 
     plt.plot(range(len(jaccard2)), jaccard2, 'b--', label='Jaccard(KLD)')
-    plt.plot(range(len(metric12)), metric12, 'g--', label='Best 1 metric(KLD)')
-    plt.plot(range(len(metric22)), metric22, 'r--', label='Best k metric(KLD)')
+    plt.plot(range(len(metric12)), metric12, 'g--', label='Accuracy(KLD)')
+    plt.plot(range(len(metric22)), metric22, 'r--', label='Precision(KLD)')
 
     plt.legend(loc='best')
-    plt.xlabel('Epochs')
-    plt.ylabel('Metrics')
     plt.show()
-    fig.savefig('../../data/metrics.png', dpi=1000)
+    #plt.close('all')
+    fig.savefig('../../data/metrics_lda.png', format='png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
     y_pred = model.predict(X_val)
     y_true_cols = np.count_nonzero(y_true, axis=1)
     correct_pred = 0
-
-    print "Printing predictions"
-    val = np.max(y_pred, axis=1)
-    print val
-    print len(val[val >= 0.5])
     for i in xrange(len(y_pred)):
         pred_indices = np.argsort(y_pred[i])[-y_true_cols[i]:][::-1]
         true_indices = np.argsort(y_true[i])[-y_true_cols[i]:][::-1]
@@ -209,32 +204,13 @@ def test(model, X_val, df):
     print (df.columns[pred_indices])
 
 
-def learn_thresholds(out, y):
-
-    threshold = np.arange(0.1, 0.9, 0.1)
-
-    acc = []
-    accuracies = []
-    best_threshold = np.zeros(out.shape[1])
-    for i in range(out.shape[1]):
-        y_prob = np.array(out[:, i])
-        for j in threshold:
-            y_pred = [1 if prob >= j else 0 for prob in y_prob]
-            acc.append(matthews_corrcoef(y[:, i], y_pred))
-        acc = np.array(acc)
-        index = np.where(acc == acc.max())
-        accuracies.append(acc.max())
-        best_threshold[i] = threshold[index[0][0]]
-        acc = []
-    print best_threshold
-
-
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
+    print X_train.shape
     fc_net_model, logger, hist = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
-    learn_thresholds(fc_net_model.predict_proba(X_test), y_test.drop('summary', axis=1).as_matrix())
     plot_loss(logger)
     plot_losses(hist)
     plot_metrics(logger)
-    # results = predict(fc_net_model, X_test, y_test.as_matrix())
+    results = predict(fc_net_model, X_test, y_test.as_matrix())
+    print(results)
     # print results
