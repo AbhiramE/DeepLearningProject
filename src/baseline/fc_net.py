@@ -119,7 +119,7 @@ def run_model(X_train, y_train):
     adam = Adam(lr=5e-5)
     model.compile(loss='binary_crossentropy', optimizer=adam, metrics=[jaccard_similarity])
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val),
-                        epochs=400, batch_size=128, callbacks=[logger])
+                        epochs=150, batch_size=128, callbacks=[logger])
 
     return model, logger, history
 
@@ -132,7 +132,7 @@ def plot_loss(logger):
     plt.xlabel("Iterations")
     plt.ylabel("Loss")
     plt.plot(x_axis, train_loss, 'b-', label='Training Loss')
-    plt.plot(x_axis, train_loss2, 'g-', label='Training Loss(KLD)')
+    # plt.plot(x_axis, train_loss2, 'g-', label='Training Loss(KLD)')
     plt.legend(loc='best')
     plt.show()
     # plt.close('all')
@@ -151,7 +151,7 @@ def plot_losses(history):
     plt.plot(x_axis, val_loss, 'g-', label='Validation Loss')
     plt.legend(loc='best')
     plt.show()
-    #plt.close('all')
+    # plt.close('all')
     fig.savefig('../../data/validation_vs_training_loss_lda.png',
                 format='png', dpi=1000)
 
@@ -172,26 +172,26 @@ def plot_metrics(logger):
     metric12 = pd.Series(p.load(open(LOGGER_DUMP_METRIC1, 'rb')))
     metric22 = pd.Series(p.load(open(LOGGER_DUMP_METRIC2, 'rb')))
 
-    plt.plot(range(len(jaccard2)), jaccard2, 'b--', label='Jaccard(KLD)')
-    plt.plot(range(len(metric12)), metric12, 'g--', label='Accuracy(KLD)')
-    plt.plot(range(len(metric22)), metric22, 'r--', label='Precision(KLD)')
+    # plt.plot(range(len(jaccard2)), jaccard2, 'b--', label='Jaccard(KLD)')
+    # plt.plot(range(len(metric12)), metric12, 'g--', label='Accuracy(KLD)')
+    # plt.plot(range(len(metric22)), metric22, 'r--', label='Precision(KLD)')
 
     plt.legend(loc='best')
     plt.show()
-    #plt.close('all')
+    # plt.close('all')
     fig.savefig('../../data/metrics_lda.png', format='png', dpi=1000)
 
 
 def predict(model, X_val, y_true):
     y_pred = model.predict(X_val)
-    y_true_cols = np.count_nonzero(y_true, axis=1)
-    correct_pred = 0
+    correct_pred = 0.0
     for i in xrange(len(y_pred)):
-        pred_indices = np.argsort(y_pred[i])[-y_true_cols[i]:][::-1]
-        true_indices = np.argsort(y_true[i])[-y_true_cols[i]:][::-1]
-        if len(np.intersect1d(pred_indices, true_indices)) > 0:
-            correct_pred += 1
-    return float(correct_pred) / len(y_pred)
+        pred_indices = np.argsort(y_pred[i])[-3:][::-1]
+        true_indices = np.argsort(y_true[i])[-3:][::-1]
+        intersect = np.intersect1d(pred_indices, true_indices)
+        if len(intersect) > 0:
+            correct_pred += 1.0
+    return correct_pred / len(y_true)
 
 
 def test(model, X_val, df):
@@ -208,9 +208,9 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, = get_train_val_test(LDA_DUMP, DUMP)
     print X_train.shape
     fc_net_model, logger, hist = run_model(X_train, pd.DataFrame.as_matrix(y_train.drop('summary', axis=1)))
-    plot_loss(logger)
-    plot_losses(hist)
-    plot_metrics(logger)
-    results = predict(fc_net_model, X_test, y_test.as_matrix())
+    # plot_loss(logger)
+    # plot_losses(hist)
+    # plot_metrics(logger)
+    results = predict(fc_net_model, X_test, y_test.drop('summary', axis=1).as_matrix())
     print(results)
     # print results
